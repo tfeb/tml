@@ -65,7 +65,7 @@
   (match-let* ([(cons op body) form]
                [(cons pop pbody) (special-pattern op)])
     (unless (eqv? op pop)
-      (error "bad special pattern" "~s is not ~s" pop op))
+      (error 'expand-special "~s is not ~s" pop op))
     (let pattern-loop ([accum (list op)]
                        [tail body]
                        [ptail pbody]
