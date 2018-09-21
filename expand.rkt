@@ -5,11 +5,11 @@
 ;;;
 
 (provide define-macro
-         expand
+         expand-macros
          define-special-pattern)
 
+
 ;;; Operators which have special evaluation rules
-;;; (I think there only will be lambda in fact)
 ;;;
 
 (define special-patterns (make-hasheqv))
@@ -25,6 +25,8 @@
   (hash-set! special-patterns 'op '(op spec ...)))
 
 (define-special-pattern (lambda args expr ...))
+(define-special-pattern (define thing expr ...))
+(define-special-pattern (set! thing expr))
 
 
 ;;; Macros
@@ -44,20 +46,20 @@
                          (apply (lambda (arg ... . tail) form ...)
                                 (rest whole)))))
 
-(define (expand form)
+(define (expand-macros form)
   ;; expanding a form
   (if (cons? form)
       ;; only compound forms are even considered
       (let ([op (first form)])
         (cond [(macro? op)
                ;; it's a macro: call the macro function & recurse on the result
-               (expand ((macro op) form))]
+               (expand-macros ((macro op) form))]
               [(special-pattern? op)
                ;; it's special: use the special expander
                (expand-special form)]
               [else
                ;; just expand every element.
-               (map expand form)]))
+               (map expand-macros form)]))
       form))
 
 (define (expand-special form)
@@ -86,7 +88,7 @@
                           [ctx (if ellipsis? context ptf)]
                           [ptt (if ellipsis? ptail ptr)])
                (pattern-loop (cons (if (eqv? ctx 'expr)
-                                       (expand btf)
+                                       (expand-macros btf)
                                        btf)
                                    accum)
                              btr ptt ctx))]))))
@@ -94,11 +96,24 @@
 ;;; Sample macros
 ;;;
 
+;(define-macro (let bindings . body)
+;  ;; Really primitive version
+;  (cons (cons 'lambda (cons (map first bindings) body))
+;        (map second bindings)))
+
+;(define-macro (let bindings . body)
+;  ;; without backquote, but usung list* to make it a bit
+;  ;; less painful
+;  (list* (list* 'lambda (map first bindings) body)
+;         (map second bindings)))
+
 (define-macro (let bindings . body)
+  ;; with backquote
   `((lambda ,(map first bindings) ,@body)
     ,@(map second bindings)))
 
 (define-macro (when test . forms)
+  ;; just another example
   `(if ,test
        (begin ,@forms)
        (void)))
@@ -109,6 +124,7 @@
                             
 
 (define-macro (cond . clauses)
+  ;; A more hairy example
   (let expand-cond-clause ([clause (first clauses)]
                            [more-clauses (rest clauses)])
     (match-let ([(cons test forms) clause])
@@ -125,14 +141,15 @@
                    (expand-cond-clause (first more-clauses)
                                        (rest more-clauses))
                    '(void)))]))))
-;;; Broken
+
 ;(define-macro (prog1 form . forms)
+;  ;; Broken
 ;  `(let ([r ,form])
 ;     ,@forms
 ;     r))
 
-;;; Working
 (define-macro (prog1 form . forms)
+  ;; Working
   (let ([rn (string->uninterned-symbol "r")])
     `(let ([,rn ,form])
        ,@forms
