@@ -29,7 +29,6 @@
     (let ([bhash (make-hasheqv)])
       (λ (n)
         (hash-ref bhash n (thunk (make-string n #\Space))))))
-                           
 
   (define (lprintf fmt . args)
     (display (blanks (trace-level)) (trace-output-port))
@@ -68,6 +67,7 @@
        (define fn (tracify function 'fn))])))
 
 (require 'simple-tracing)
+
 
 ;;; Operators which have special evaluation rules
 ;;;
@@ -152,6 +152,7 @@
                                    accum)
                              btr ptt ctx))]))))
 
+
 ;;; Sample macros
 ;;;
 
@@ -189,7 +190,6 @@
 (define-macro (unless test . forms)
   `(when (not ,test)
      ,@forms))
-                            
 
 (define-macro (cond . clauses)
   ;; A more hairy example
