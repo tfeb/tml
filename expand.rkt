@@ -7,8 +7,63 @@
 
 (provide define-macro
          expand-macros
-         define-special-pattern)
+         define-special-pattern
+         (rename-out (tracing trace-expansion)))
 
+;;; Tracing support
+;;;
+
+(module simple-tracing racket
+  (provide tracing trace-output-port
+           tracify define/traced)
+
+  (define tracing (make-parameter #f))
+  (define trace-output-port (make-parameter (current-error-port)))
+  (define trace-level (make-parameter 0))
+
+  (define blanks
+    (let ([bhash (make-hasheqv)])
+      (λ (n)
+        (hash-ref bhash n (thunk (make-string n #\Space))))))
+                           
+
+  (define (lprintf fmt . args)
+    (display (blanks (trace-level)) (trace-output-port))
+    (apply tprintf fmt args))
+
+  (define (tprintf fmt . args)
+    (apply fprintf (trace-output-port) fmt args))
+
+  (define (tracify function (name (void)))
+    (λ args
+      (cond [(tracing)
+             (lprintf "[~A" (if (not (void? name)) name "λ"))
+             (for ([a (in-list args)])
+               (tprintf " ~S" a))
+             (tprintf "~%")
+             (call-with-values
+              (thunk
+               (parameterize ([trace-level (+ (trace-level) 1)])
+                 (apply function args)))
+              (λ vals
+                (lprintf " ->")
+                (if (null? vals)
+                    (tprintf ".")
+                    (for ([v (in-list vals)])
+                      (tprintf " ~S" v)))
+                (tprintf "~%")
+                (apply values vals)))]
+            [else
+             (apply function args)])))
+
+  (define-syntax define/traced
+    (syntax-rules ()
+      [(_ (fn . args) form ...)
+       (define fn (tracify (λ args form ...) 'fn))]
+      [(_ fn function)
+       (define fn (tracify function 'fn))])))
+
+(require 'simple-tracing)
 
 ;;; Operators which have special evaluation rules
 ;;;
@@ -47,8 +102,7 @@
                          (apply (lambda (arg ... . tail) form ...)
                                 (rest whole)))))
 
-(define (expand-macros form)
-  ;; expanding a form
+(define/traced (expand-macros form)
   (if (cons? form)
       ;; only compound forms are even considered
       (let ([op (first form)])
@@ -63,7 +117,7 @@
                (map expand-macros form)]))
       form))
 
-(define (expand-special form)
+(define/traced (expand-special form)
   ;; expand a special thing based on a pattern.
   (match-let* ([(cons op body) form]
                [(cons pop pbody) (special-pattern op)])
