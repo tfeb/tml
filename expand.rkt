@@ -12,6 +12,10 @@
 
 ;;; Tracing support
 ;;;
+;;; This perhaps should have an independent existence, which is why
+;;; it's in a submodule like this: it's potentially a lot more useful
+;;; than the rest of the code.
+;;;
 
 (module simple-tracing racket
   (provide tracing trace-output-port
@@ -51,7 +55,7 @@
                     (tprintf ".")
                     (for ([v (in-list vals)])
                       (tprintf " ~S" v)))
-                (tprintf "~%")
+                (tprintf "]~%")
                 (apply values vals)))]
             [else
              (apply function args)])))
