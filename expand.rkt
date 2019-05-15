@@ -1,6 +1,7 @@
 #lang racket
 
-;;;; A trivial CL-style macro-expander for
+;;;; A trivial CL-style macro-expander for fun
+;;;
 ;;; This is likely to be wrong
 ;;;
 
@@ -95,6 +96,15 @@
 
 ;;; Sample macros
 ;;;
+
+;(hash-set! macros 'let
+;           ;; this is what define-macro turns into
+;           (lambda (whole)
+;             (apply (lambda (bindings . body)
+;                      (cons (cons 'lambda
+;                                  (cons (map first bindings) body))
+;                            (map second bindings)))
+;                    (rest whole))))
 
 ;(define-macro (let bindings . body)
 ;  ;; Really primitive version
