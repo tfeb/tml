@@ -83,12 +83,6 @@
 (define-syntax-rule (define-special-pattern (op spec ...))
   (hash-set! special-patterns 'op '(op spec ...)))
 
-(define-special-pattern (quote thing))
-(define-special-pattern (lambda args expr ...))
-(define-special-pattern (define thing expr ...))
-(define-special-pattern (set! thing expr))
-
-
 ;;; Macros
 ;;;
 
