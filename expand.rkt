@@ -68,7 +68,6 @@
 
 (require 'simple-tracing)
 
-
 ;;; Operators which have special evaluation rules
 ;;;
 
@@ -103,8 +102,8 @@
   (hash-ref macros op))
 
 (define-syntax-rule (define-macro (m arg ... . tail) form ...)
-  (hash-set! macros 'm (lambda (whole)
-                         (apply (lambda (arg ... . tail) form ...)
+  (hash-set! macros 'm (λ (whole)
+                         (apply (λ (arg ... . tail) form ...)
                                 (rest whole)))))
 
 (define/traced (expand-macros form)
@@ -157,29 +156,33 @@
 ;;; Sample macros
 ;;;
 
-;(hash-set! macros 'let
-;           ;; this is what define-macro turns into
-;           (lambda (whole)
-;             (apply (lambda (bindings . body)
-;                      (cons (cons 'lambda
-;                                  (cons (map first bindings) body))
-;                            (map second bindings)))
-;                    (rest whole))))
+#||
+#;
+(hash-set! macros 'let
+           ;; this is what define-macro turns into
+           (λ (whole)
+             (apply (λ (bindings . body)
+                      (cons (cons '
+                                  (cons (map first bindings) body))
+                            (map second bindings)))
+                    (rest whole))))
 
-;(define-macro (let bindings . body)
-;  ;; Really primitive version
-;  (cons (cons 'lambda (cons (map first bindings) body))
-;        (map second bindings)))
+#;
+(define-macro (let bindings . body)
+  ;; Really primitive version
+  (cons (cons 'λ (cons (map first bindings) body))
+        (map second bindings)))
 
-;(define-macro (let bindings . body)
-;  ;; without backquote, but usung list* to make it a bit
-;  ;; less painful
-;  (list* (list* 'lambda (map first bindings) body)
-;         (map second bindings)))
+#;
+(define-macro (let bindings . body)
+  ;; without backquote, but usung list* to make it a bit
+  ;; less painful
+  (list* (list* 'λ (map first bindings) body)
+         (map second bindings)))
 
 (define-macro (let bindings . body)
   ;; with backquote
-  `((lambda ,(map first bindings) ,@body)
+  `((λ ,(map first bindings) ,@body)
     ,@(map second bindings)))
 
 (define-macro (when test . forms)
@@ -211,11 +214,12 @@
                                        (rest more-clauses))
                    '(void)))]))))
 
-;(define-macro (prog1 form . forms)
-;  ;; Broken
-;  `(let ([r ,form])
-;     ,@forms
-;     r))
+#;
+(define-macro (prog1 form . forms)
+  ;; Broken
+  `(let ([r ,form])
+     ,@forms
+     r))
 
 (define-macro (prog1 form . forms)
   ;; Working
@@ -223,3 +227,4 @@
     `(let ([,rn ,form])
        ,@forms
        ,rn)))
+||#
