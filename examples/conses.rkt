@@ -1,6 +1,6 @@
 #lang racket
 
-(require "tml.rkt")
+(require tml)
 
 (define primitives
   (augment-environment*

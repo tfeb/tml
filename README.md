@@ -1,0 +1,2 @@
+# Tiny Macro Lisp
+TML is a tiny, toy evaluator whose only interesting feature is that it contains a Lisp-style (as opposed to Scheme-style) macroexpander.  Its only purpose in life is to show the macroexpander working.
