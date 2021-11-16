@@ -8,6 +8,7 @@
 (require "expand.rkt")
 
 (provide evaluate evaluate-sequence
+         empty-environment
          augment-environment augment-environment*
          with-environment define-environment)
 
