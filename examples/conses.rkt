@@ -19,6 +19,18 @@
   (cdr (λ (c)
          (c (λ (a b) b))))
   (nil '())
-  (null? (λ (a) (eq? a nil))))
+  (null? (λ (a) (eqv? a nil))))
 
 (evaluate '(null? (car (cons 1 2))) conses)
+
+;;; Of you can define them in the language:
+
+(evaluate-sequence
+ '((define cons (λ (a b)
+                  (λ (m)
+                    (m a b))))
+   (define car (λ (c)
+                 (c (λ (a b) a))))
+   (define cdr (λ (c)
+                 (c (λ (a b) b))))
+   (cdr (cdr (cons 1 (cons 3 4))))))

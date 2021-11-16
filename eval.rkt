@@ -112,7 +112,7 @@
   (match forms
     [(list (list 'define (? symbol? name) value) forms ...)
      (evaluate-sequence-in-environment
-      forms (augment-environment env (evaluate-in-environment value env)))]
+      forms (augment-environment env name (evaluate-in-environment value env)))]
     [(list (and mutant (list 'define _ ...)) _ ...)
      (error 'evaluate-sequence "mutant define: ~S" mutant)]
     [(list form)
