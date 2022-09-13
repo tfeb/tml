@@ -91,6 +91,10 @@
     [(list (or 'λ 'lambda)
            (list (? symbol? args) ...)
            forms ...)
+     (for ([arg (in-list args)])
+       ;; Scheme would allow this but it's too hard for the macroexpander
+       (when (memv arg '(quote lambda λ define))
+         (error 'evaluate "binding a special operator name")))
      (make-function args forms env)]
     [(list (or 'λ 'lambda) _ ...)
      (error 'evaluate "mutant λ: ~S" form)]
